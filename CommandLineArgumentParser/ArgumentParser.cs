@@ -1,22 +1,25 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace CommandLineArgumentParser
 {
-    public class ArgumentParser
+    public class ArgumentParser : IArgumentParser
     {
-        private readonly ICommandLineInputProvider inputProvider;
+        private readonly IOptionsParser optionsParser;
 
-        public ArgumentParser(ICommandLineInputProvider inputProvider)
+        public ArgumentParser(IOptionsParser optionsParser)
         {
-            this.inputProvider = inputProvider;
+            this.optionsParser = optionsParser;
         }
 
-        public ParseResult GetParseResult()
+        public Argument Parse(string commandLineInput)
         {
-            var result = new ParseResult();
-            result.CommandLineInput = inputProvider.GetCommandLineInput();
-            result.Arguments = result.CommandLineInput.Split("/".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(i => new Argument(i.Trim()));
+            string[] argumentParts = commandLineInput.Split(' ');
+            Argument result = new Argument(commandLineInput);
+            result.Name = argumentParts[0];
+
+            if (argumentParts.Count() > 1)
+                result.Options = optionsParser.Parse(commandLineInput);
+
             return result;
         }
     }
